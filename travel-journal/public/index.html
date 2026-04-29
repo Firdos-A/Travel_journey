@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Wanderlust Travel Journal</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;1,600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+  <link rel="stylesheet" href="/css/main.css" />
+</head>
+<body>
+  <div id="authScreen" class="auth-screen">
+    <section class="auth-panel">
+      <div>
+        <div class="brand-mark">Wanderlust</div>
+        <h1>Chart the places that <em>changed you.</em></h1>
+        <p>A cinematic travel journal for pinned routes, photo-rich memories, and the stories that belong to each stop.</p>
+      </div>
+      <div class="auth-card">
+        <div class="auth-tabs">
+          <button id="tabSignIn" class="auth-tab active">Sign In</button>
+          <button id="tabSignUp" class="auth-tab">Create Account</button>
+        </div>
+        <form id="signInForm" class="auth-form active">
+          <label>Email<input type="email" id="siEmail" required placeholder="you@example.com" /></label>
+          <label>Password<input type="password" id="siPassword" required placeholder="Your password" minlength="6" /></label>
+          <button class="btn-primary" type="submit">Begin Journey</button>
+          <p><button type="button" id="switchToForgot">Forgot password?</button></p>
+          <p>New here? <button type="button" id="switchToSignUp">Create account</button></p>
+        </form>
+        <form id="signUpForm" class="auth-form">
+          <label>Full Name<input type="text" id="suName" required placeholder="Alex Rivera" /></label>
+          <label>Username<input type="text" id="suUsername" required placeholder="adventure_seeker" /></label>
+          <label>Email<input type="email" id="suEmail" required placeholder="you@example.com" /></label>
+          <label>Password<input type="password" id="suPassword" required placeholder="At least 6 characters" minlength="6" /></label>
+          <label>Confirm Password<input type="password" id="suPasswordConfirm" required placeholder="Type it again" minlength="6" /></label>
+          <label>Bio<input type="text" id="suBio" placeholder="Passport stamps collector" /></label>
+          <button class="btn-primary" type="submit">Start Exploring</button>
+          <p>Already have an account? <button type="button" id="switchToSignIn">Sign in</button></p>
+        </form>
+        <form id="forgotForm" class="auth-form">
+          <label>Email<input type="email" id="fpEmail" required placeholder="you@example.com" /></label>
+          <label>New Password<input type="password" id="fpPassword" required placeholder="At least 6 characters" minlength="6" /></label>
+          <label>Confirm New Password<input type="password" id="fpPasswordConfirm" required placeholder="Type it again" minlength="6" /></label>
+          <button class="btn-primary" type="submit">Reset Password</button>
+          <p>Remembered it? <button type="button" id="switchForgotToSignIn">Sign in</button></p>
+        </form>
+      </div>
+    </section>
+  </div>
+
+  <div id="mainApp" class="main-app hidden">
+    <nav id="navbar" class="navbar">
+      <button class="nav-brand" data-page="home">Wanderlust</button>
+      <div class="nav-links">
+        <button class="nav-btn active" data-page="home">Explore</button>
+        <button class="nav-btn" data-page="journals">Journals</button>
+        <button class="nav-btn" data-page="map">World Map</button>
+      </div>
+      <div class="nav-actions">
+        <button class="btn-primary" id="newEntryBtn">New Entry</button>
+        <button class="nav-avatar" id="navAvatar"><span id="navInitial">?</span></button>
+        <div class="avatar-dropdown" id="avatarDropdown">
+          <strong id="avatarName">-</strong>
+          <span id="avatarEmail">-</span>
+          <button id="logoutBtn">Sign Out</button>
+        </div>
+      </div>
+    </nav>
+
+    <main>
+      <section class="page active" id="page-home">
+        <div class="hero">
+          <div>
+            <span class="eyebrow">Personal travel archive</span>
+            <h1>Every journey <em>deserves a story</em></h1>
+            <p>Pin the exact place, collect the photos, and keep the small details that make a trip feel alive.</p>
+            <div class="hero-actions">
+              <button class="btn-primary" id="heroNewEntry">Write Entry</button>
+              <button class="btn-secondary" data-page="map">Open Map</button>
+            </div>
+          </div>
+          <div class="latest-card">
+            <span>Latest Entry</span>
+            <div id="floatImg" class="latest-image">Map</div>
+            <h3 id="floatTitle">Start writing your first story</h3>
+            <p id="floatLoc">Somewhere amazing</p>
+          </div>
+        </div>
+
+        <div class="stats-row">
+          <div><strong id="statEntries">0</strong><span>Entries</span></div>
+          <div><strong id="statCountries">0</strong><span>Countries</span></div>
+          <div><strong id="statJournals">0</strong><span>Journals</span></div>
+        </div>
+
+        <div class="section-header">
+          <div><h2>Recent Adventures</h2><p>Your latest journal entries</p></div>
+          <input id="searchInput" class="search-input" type="search" placeholder="Search destinations" />
+        </div>
+        <div class="filter-pills" id="filterPills">
+          <button class="pill active" data-mood="">All</button>
+          <button class="pill" data-mood="amazing">Amazing</button>
+          <button class="pill" data-mood="happy">Happy</button>
+          <button class="pill" data-mood="neutral">Neutral</button>
+          <button class="pill" data-mood="tired">Tired</button>
+          <button class="pill" data-mood="difficult">Difficult</button>
+        </div>
+        <div class="entries-grid" id="entriesGrid"></div>
+      </section>
+
+      <section class="page" id="page-journals">
+        <div class="page-header">
+          <div><h1>My Journals</h1><p>Open a journal to see its entries and photos.</p></div>
+          <button class="btn-primary" id="newJournalBtn">New Journal</button>
+        </div>
+        <div class="journals-grid" id="journalsGrid"></div>
+      </section>
+
+      <section class="page" id="page-journal-detail">
+        <button class="btn-secondary" data-page="journals">Back to Journals</button>
+        <div id="journalDetail"></div>
+      </section>
+
+      <section class="page" id="page-entry-detail">
+        <button class="btn-secondary" id="backFromEntry">Back</button>
+        <div id="entryDetail"></div>
+      </section>
+
+      <section class="page" id="page-map">
+        <div class="map-layout">
+          <div class="map-topbar">
+            <div><h1>World Map</h1><p id="mapSubtitle">Markers appear as soon as entries have coordinates.</p></div>
+            <button class="btn-primary" id="mapNewEntryBtn">Add Journey</button>
+          </div>
+          <div id="leafletMap"></div>
+          <aside class="map-sidebar">
+            <h3>Places Visited</h3>
+            <ul id="countryList" class="country-list"></ul>
+          </aside>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal-overlay" id="entryModal">
+    <div class="modal modal-wide">
+      <button class="modal-close" data-close="entryModal">x</button>
+      <h2 id="entryModalTitle">New Entry</h2>
+      <form id="entryForm" class="modal-form">
+        <input type="hidden" id="entryId" />
+        <input type="hidden" id="entryLat" />
+        <input type="hidden" id="entryLng" />
+        <div class="form-row">
+          <label>Title *<input type="text" id="entryTitle" required /></label>
+          <label>Date<input type="date" id="entryDate" /></label>
+        </div>
+        <div class="form-row">
+          <label>Location<input type="text" id="entryLocation" placeholder="City or place" /></label>
+          <label>Country *<input type="text" id="entryCountry" required placeholder="Japan" /></label>
+        </div>
+        <div class="form-row">
+          <label>Mood<select id="entryMood">
+            <option value="">Pick one</option>
+            <option value="amazing">Amazing</option>
+            <option value="happy">Happy</option>
+            <option value="neutral">Neutral</option>
+            <option value="tired">Tired</option>
+            <option value="difficult">Difficult</option>
+          </select></label>
+          <label>Journal<select id="entryJournal"><option value="">No journal</option></select></label>
+        </div>
+        <label>Choose Location
+          <div class="place-search">
+            <input type="text" id="entryPlaceSearch" placeholder="Type a place, city, or landmark" />
+            <button type="button" class="btn-secondary" id="findPlaceBtn">Find Place</button>
+          </div>
+          <div class="location-tools">
+            <button type="button" class="btn-secondary" id="useCountryCenter">Use Country Center</button>
+            <span id="pickedLocation">No pin selected yet</span>
+          </div>
+          <div id="entryPickerMap"></div>
+        </label>
+        <label>Pictures
+          <input type="file" id="entryCoverFile" accept="image/*" multiple />
+          <div id="entryPhotoPreview" class="photo-preview"></div>
+        </label>
+        <label>Story<textarea id="entryContent" rows="5"></textarea></label>
+        <label>Tags<input type="text" id="entryTags" placeholder="food, culture, hiking" /></label>
+        <div class="form-actions">
+          <button type="button" class="btn-secondary" data-close="entryModal">Cancel</button>
+          <button type="submit" class="btn-primary">Save Entry</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="journalModal">
+    <div class="modal">
+      <button class="modal-close" data-close="journalModal">x</button>
+      <h2>New Journal</h2>
+      <form id="journalForm" class="modal-form">
+        <label>Title *<input type="text" id="journalTitle" required /></label>
+        <label>Description<textarea id="journalDesc" rows="3"></textarea></label>
+        <label>Cover Photo<input type="file" id="journalCoverFile" accept="image/*" /></label>
+        <label class="checkbox"><input type="checkbox" id="journalPublic" /> Make this journal public</label>
+        <div class="form-actions">
+          <button type="button" class="btn-secondary" data-close="journalModal">Cancel</button>
+          <button type="submit" class="btn-primary">Create Journal</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>
+
